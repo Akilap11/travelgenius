@@ -1,7 +1,10 @@
+"use client"
 import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { SignInButton } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
+import Link from "next/link";
 
 const menuItems = [
   { title: "Home", path: "/" },
@@ -10,6 +13,7 @@ const menuItems = [
 ];
 
 const Header = () => {
+  const { user } = useUser();
   return (
     <div className="w-full flex items-center justify-between px-10 py-4 bg-white shadow-md">
       {/* Logo */}
@@ -30,10 +34,14 @@ const Header = () => {
       </div>
 
       {/* Get Started Button #087443 */}
-      <SignInButton mode='modal'> 
-        <Button>Get Started</Button>
-      </SignInButton>
-     
+      {!user ? 
+        <SignInButton mode='modal'>
+          <Button>Get Started</Button>
+        </SignInButton>:
+        <Link href="/create-trip">
+          <Button>Create Trip</Button>
+        </Link>
+      }
     </div>
   );
 };
