@@ -43,7 +43,7 @@ function Hero() {
       router.push('/sign-in');
       return ;
     }
-    //create trip planner web
+    router.push('/create-new-trip');
   }
 
   return (
