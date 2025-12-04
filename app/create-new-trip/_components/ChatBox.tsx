@@ -5,10 +5,13 @@ import axios from "axios";
 import { Loader, Send } from "lucide-react";
 import React, { useState } from "react";
 import EmptyboxState from "./EmptyboxState";
+import GroupSizeUi from "./GroupSizeUi";
+import BudgetUi from "./BudgetUi";
 
 type Message = {
   role: string;
   content: string;
+  ui?:string;
 };
 
 function ChatBox() {
@@ -37,11 +40,24 @@ function ChatBox() {
       {
         role: "assistant",
         content: result?.data?.resp,
+        ui: result?.data?.ui,
       },
     ]);
     console.log("AI Response:", result?.data);
     setLoading(false);
   };
+
+  const RenderGenerativeUi=(ui:string )=>{
+    if(ui=='budget')
+    {
+      return <BudgetUi  onSelectedOption = {(v:string)=>{setUserInput(v);onSend()}}/>
+    }
+    else if(ui=='groupSize'){
+      return <GroupSizeUi  onSelectedOption = {(v:string)=>{setUserInput(v);onSend()}}/>
+    }
+  }
+
+
   return (
     <div className="flex flex-col h-[80vh] ">
       {messsages?.length == 0 && (
@@ -65,6 +81,7 @@ function ChatBox() {
             <div className="flex justify-start mt-2" key={index}>
               <div className="max-w-lg bg-gray-200 text-black px-4 py-2 rounded-lg">
                 {msg.content}
+                {RenderGenerativeUi(msg.ui??"")}
               </div>
             </div>
           )

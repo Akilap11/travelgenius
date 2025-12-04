@@ -18,10 +18,12 @@ Only ask questions about the following details in order. and wait for the users 
 Do not ask multiple qu ..tions at once, and never ask irrelevant questions.
 If any answer is missing or unclear, politely ask the user to clarify before proceeding.
 Always maintain a conversatimal, interactive style while asking questions.
-Along wth response also send which ui component to display for generative IJI for example 'budgeVgroupSize/TripDuration/Final) , where Final means A1 generating c
+Along wth response also send which ui component to display for generative IJI for example 'budgeVgroupSize/tripDuration/final) , where Final means A1 generating c
 Onoe all required information is collected, generate and return a strict JSON respnse only (no explanations or extra text) with following JSON schema:
+{
 resp:'Text Resp•,
-ui:budget/groupSize/TripDuration/Final)'`;
+ui:budget/groupSize/tripDuration/final)'
+}`;
 
 export async function POST(request: Request) {
   const { messages } = await request.json();
