@@ -25,17 +25,53 @@ resp:'Text Resp•,
 ui:budget/groupSize/tripDuration/final)'
 }`;
 
+const FINAL_PROMPT = `Generate Travel Plan with given details, give me Hotels options list -
+Hotel address, Price, hotel image ur l, geo coordinates, rating, descriptions and suggest il
+Geo Coordinates, Place address, ticket Pricing, Time travel each of the location , with eacl
+Output Schema:
+"trip_plan": {
+"destination": "string",
+"duration": "string",
+"origin": "string",
+"budget": "string",
+"group_size": "string" ,
+"hotels":
+"hotel name": "string",
+"hotel address": "string",
+"price_per_night": "string",
+"hotel_image_url": "string",
+" geo_coo rd inates" :
+"latitude": "number",
+"longitude": "number"',
+"rating": "number",
+"description": "string"
+},
+;"attractions": [
+{
+"place_name": "string",
+"place_address": "string",
+"geo_coordinates": {
+"latitude": "number",
+"longitude": "number"
+},
+"ticket_pricing": "string",
+"time_to_travel": "string",
+"description": "string"
+}
+]
+}`;
+
 export async function POST(request: Request) {
-  const { messages } = await request.json();
+  const { messages, isFinal } = await request.json();
 
   try {
     const completion = await openai.chat.completions.create({
       model: "openai/gpt-oss-20b:free",
-      response_format: {type:'json_object'},
+      response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
-          content: PROMPT,
+          content: isFinal ? FINAL_PROMPT : PROMPT,
         },
         ...messages,
       ],

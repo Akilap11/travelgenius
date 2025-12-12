@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import axios from "axios";
 import { Loader, Send } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import EmptyboxState from "./EmptyboxState";
 import GroupSizeUi from "./GroupSizeUi";
 import BudgetUi from "./BudgetUi";
@@ -11,7 +11,7 @@ import BudgetUi from "./BudgetUi";
 type Message = {
   role: string;
   content: string;
-  ui?:string;
+  ui?: string;
 };
 
 function ChatBox() {
@@ -19,8 +19,11 @@ function ChatBox() {
   const [userInput, setUserInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
+  const [isFinal, setIsFinal] = useState<boolean>(false);
+  const [tripDetail, setTripDetail] = useState<any>(null);
+
   const onSend = async () => {
-    if (!userInput?.trim()) return;
+    // if (!userInput?.trim()) return;
 
     setLoading(true);
     setUserInput("");
@@ -34,29 +37,63 @@ function ChatBox() {
 
     const result = await axios.post("/api/aimodel/", {
       messages: [...messsages, newMsg],
+      isFinal: isFinal,
     });
-    setMessages((prev: Message[]) => [
-      ...prev,
-      {
-        role: "assistant",
-        content: result?.data?.resp,
-        ui: result?.data?.ui,
-      },
-    ]);
     console.log("AI Response:", result?.data);
+
+    !isFinal &&
+      setMessages((prev: Message[]) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: result?.data?.resp,
+          ui: result?.data?.ui,
+        },
+      ]);
+
+    if (isFinal) {
+      setTripDetail(result?.data.trip_plan);
+    }
+
     setLoading(false);
   };
 
-  const RenderGenerativeUi=(ui:string )=>{
-    if(ui=='budget')
-    {
-      return <BudgetUi  onSelectedOption = {(v:string)=>{setUserInput(v);onSend()}}/>
+  const RenderGenerativeUi = (ui: string) => {
+    if (ui == "budget") {
+      return (
+        <BudgetUi
+          onSelectedOption={(v: string) => {
+            setUserInput(v);
+            onSend();
+          }}
+        />
+      );
+    } else if (ui == "groupSize") {
+      return (
+        <GroupSizeUi
+          onSelectedOption={(v: string) => {
+            setUserInput(v);
+            onSend();
+          }}
+        />
+      );
     }
-    else if(ui=='groupSize'){
-      return <GroupSizeUi  onSelectedOption = {(v:string)=>{setUserInput(v);onSend()}}/>
-    }
-  }
+  };
 
+  useEffect(() => {
+    const lastMg = messsages[messsages.length - 1];
+    if (lastMg?.ui == "final") {
+      setIsFinal(true);
+      setUserInput("Ok, Great!");
+      onSend();
+    }
+  }, [messsages]);
+
+  useEffect(() => {
+    if (isFinal && userInput) {
+      onSend();
+    }
+  }, [isFinal]);
 
   return (
     <div className="flex flex-col h-[80vh] ">
@@ -81,7 +118,7 @@ function ChatBox() {
             <div className="flex justify-start mt-2" key={index}>
               <div className="max-w-lg bg-gray-200 text-black px-4 py-2 rounded-lg">
                 {msg.content}
-                {RenderGenerativeUi(msg.ui??"")}
+                {RenderGenerativeUi(msg.ui ?? "")}
               </div>
             </div>
           )
