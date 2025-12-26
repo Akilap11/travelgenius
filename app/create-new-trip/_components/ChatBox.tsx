@@ -7,6 +7,8 @@ import React, { useEffect, useState } from "react";
 import EmptyboxState from "./EmptyboxState";
 import GroupSizeUi from "./GroupSizeUi";
 import BudgetUi from "./BudgetUi";
+import SelectDaysUi from "./SelectDaysUi";      
+import FinalUi from "./FinalUi";                 
 
 type Message = {
   role: string;
@@ -15,51 +17,60 @@ type Message = {
 };
 
 function ChatBox() {
-  const [messsages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   const [isFinal, setIsFinal] = useState<boolean>(false);
   const [tripDetail, setTripDetail] = useState<any>(null);
+  const [showFinalGenerating, setShowFinalGenerating] = useState<boolean>(false);
 
   const onSend = async () => {
-    // if (!userInput?.trim()) return;
+    if (!userInput?.trim() && !isFinal) return;
 
     setLoading(true);
-    setUserInput("");
 
     const newMsg: Message = {
       role: "user",
-      content: userInput,
+      content: userInput || "Ok, Great!",
     };
 
     setMessages((prev: Message[]) => [...prev, newMsg]);
+    setUserInput("");
 
-    const result = await axios.post("/api/aimodel/", {
-      messages: [...messsages, newMsg],
-      isFinal: isFinal,
-    });
-    console.log("AI Response:", result?.data);
+    try {
+      const result = await axios.post("/api/aimodel/", {
+        messages: [...messages, newMsg],
+        isFinal,
+      });
 
-    !isFinal &&
-      setMessages((prev: Message[]) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: result?.data?.resp,
-          ui: result?.data?.ui,
-        },
-      ]);
+      console.log("AI Response:", result?.data);
 
-    if (isFinal) {
-      setTripDetail(result?.data.trip_plan);
+      if (!isFinal) {
+        setMessages((prev: Message[]) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: result?.data?.resp || "",
+            ui: result?.data?.ui,
+          },
+        ]);
+      } else {
+        setTripDetail(result?.data.trip_plan);
+        setShowFinalGenerating(true);
+        setTimeout(() => {
+          setShowFinalGenerating(false);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const RenderGenerativeUi = (ui: string) => {
-    if (ui == "budget") {
+    if (ui === "budget") {
       return (
         <BudgetUi
           onSelectedOption={(v: string) => {
@@ -68,7 +79,7 @@ function ChatBox() {
           }}
         />
       );
-    } else if (ui == "groupSize") {
+    } else if (ui === "groupSize") {
       return (
         <GroupSizeUi
           onSelectedOption={(v: string) => {
@@ -77,27 +88,45 @@ function ChatBox() {
           }}
         />
       );
+    } else if (ui === "days") {
+      return (
+        <SelectDaysUi
+          onSelectedOption={(v: string) => {
+            setUserInput(v);
+            onSend();
+          }}
+        />
+      );
+    } else if (ui === "final") {
+      return (
+        <FinalUi
+          isGenerating={showFinalGenerating}
+          onViewTrip={() => {
+            console.log("View trip clicked", tripDetail);
+          }}
+        />
+      );
     }
+    return null;
   };
 
   useEffect(() => {
-    const lastMg = messsages[messsages.length - 1];
-    if (lastMg?.ui == "final") {
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.ui === "final" && !isFinal) {
       setIsFinal(true);
       setUserInput("Ok, Great!");
-      onSend();
     }
-  }, [messsages]);
+  }, [messages]);
 
   useEffect(() => {
     if (isFinal && userInput) {
       onSend();
     }
-  }, [isFinal]);
+  }, [isFinal, userInput]);
 
   return (
-    <div className="flex flex-col h-[80vh] ">
-      {messsages?.length == 0 && (
+    <div className="flex flex-col h-[80vh]">
+      {messages?.length === 0 && (
         <EmptyboxState
           onSelectOption={(v: string) => {
             setUserInput(v);
@@ -105,10 +134,11 @@ function ChatBox() {
           }}
         />
       )}
+
       {/* Display Messages */}
       <section className="flex-1 overflow-y-auto p-4">
-        {messsages.map((msg: Message, index) =>
-          msg.role == "user" ? (
+        {messages.map((msg: Message, index) =>
+          msg.role === "user" ? (
             <div className="flex justify-end mt-2" key={index}>
               <div className="max-w-lg bg-primary text-white px-4 py-2 rounded-lg">
                 {msg.content}
@@ -131,22 +161,32 @@ function ChatBox() {
           </div>
         )}
       </section>
-      <div className="border border-gray-300 rounded-2xl p-4 hover:shadow-md transition-shadow relative">
-        <Textarea
-          placeholder="Start typing here..."
-          className="w-full h-28 bg-transparent border-none focus-visible:ring-0 shadow-none resize-none"
-          onChange={(event) => setUserInput(event.target.value ?? "")}
-          value={userInput}
-        />
-        <Button
-          size={"icon"}
-          className="absolute right-6 bottom-6"
-          onClick={onSend}
-        >
-          <Send className="h-4 w-4" />
-        </Button>
-      </div>
-      <section></section>
+
+      {/* Input Area */}
+      {!isFinal && (
+        <div className="border border-gray-300 rounded-2xl p-4 hover:shadow-md transition-shadow relative">
+          <Textarea
+            placeholder="Start typing here..."
+            className="w-full h-28 bg-transparent border-none focus-visible:ring-0 shadow-none resize-none"
+            onChange={(event) => setUserInput(event.target.value ?? "")}
+            value={userInput}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                onSend();
+              }
+            }}
+          />
+          <Button
+            size={"icon"}
+            className="absolute right-6 bottom-6"
+            onClick={onSend}
+            disabled={loading || !userInput.trim()}
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

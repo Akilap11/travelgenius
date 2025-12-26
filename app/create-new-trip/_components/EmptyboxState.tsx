@@ -8,7 +8,7 @@ function EmptyboxState({onSelectOption}: any) {
         Start Planning Your <strong className="text-primary">Trip</strong> With
         the Help of AI
       </h2>
-      <p className="text-center text-gray-600 mt-2">
+      <p className="text-center text-gray-600 mt-2 mb-4">
         Ask me anything about your trip and I will help you plan the perfect
         itinerary!
       </p>
