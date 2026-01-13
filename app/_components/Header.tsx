@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -17,10 +17,13 @@ const Header = () => {
   return (
     <div className="w-full flex items-center justify-between px-10 py-4 bg-white shadow-md">
       {/* Logo */}
-      <div className="flex items-center gap-2">
-        <Image src="/logo.svg" alt="Logo" width={39} height={48} />
-        <h2 className="font-bold text-2xl">TravelGenius - AI</h2>
-      </div>
+      <Link href="./">
+        <div className="flex items-center gap-2">
+          <Image src="/logo.svg" alt="Logo" width={39} height={48} />
+
+          <h2 className="font-bold text-2xl">TravelGenius - AI</h2>
+        </div>
+      </Link>
 
       {/* Menu */}
       <div className="flex items-center gap-5">
@@ -34,14 +37,15 @@ const Header = () => {
       </div>
 
       {/* Get Started Button #087443 */}
-      {!user ? 
-        <SignInButton mode='modal'>
-          <Button>Get Started</Button>
-        </SignInButton>:
+      {!user ? (
+        <SignInButton mode="modal">
+          <Button className="cursor-pointer">Get Started</Button>
+        </SignInButton>
+      ) : (
         <Link href="/create-new-trip">
           <Button>Create Trip</Button>
         </Link>
-      }
+      )}
     </div>
   );
 };

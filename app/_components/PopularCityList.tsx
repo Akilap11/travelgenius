@@ -59,7 +59,7 @@ const data = [
   {
     category: "Kyoto, Japan",
     title: "Let AI guide you through Kyoto’s timeless beauty and culture.",
-    src: "https://images.unsplash.com/photo-1552632227-69bfaa79a8ec?q=100&w=3000&auto=format&fit=crop",
+    src: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?q=100&w=3000&auto=format&fit=crop",
     content: <DummyContent />,
   },
   {
@@ -77,7 +77,7 @@ const data = [
   {
     category: "Rome, Italy",
     title: "Explore ancient history and modern charm effortlessly.",
-    src: "https://images.unsplash.com/photo-1503264116251-35a269479413?q=100&w=3000&auto=format&fit=crop",
+    src: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=100&w=3000&auto=format&fit=crop",
     content: <DummyContent />,
   },
   {

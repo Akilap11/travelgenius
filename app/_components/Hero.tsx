@@ -88,12 +88,13 @@ function Hero() {
         </h2>
         </div>
         {/* Video Section */}
-        <HeroVideoDialog
-          className="block dark:hidden"
-          animationStyle="from-center"
-          videoSrc="https://www.example.com/dummy-video"
-          thumbnailSrc="https://images.unsplash.com/photo-1522199710521-72d69614c702"
-        />
+       <HeroVideoDialog
+  className="block dark:hidden pointer-events-none"
+  animationStyle="from-center"
+  videoSrc="https://www.example.com/dummy-video"
+  thumbnailSrc="https://images.unsplash.com/photo-1522199710521-72d69614c702"
+/>
+
       </div>
     </div>
   );
