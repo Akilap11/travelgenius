@@ -1,10 +1,10 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { SignInButton } from "@clerk/nextjs";
-import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { SignInButton, useUser } from "@clerk/nextjs";
+import { Menu, X } from "lucide-react";
 
 const menuItems = [
   { title: "Home", path: "/" },
@@ -14,39 +14,85 @@ const menuItems = [
 
 const Header = () => {
   const { user } = useUser();
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
-    <div className="w-full flex items-center justify-between px-10 py-4 bg-white shadow-md">
-      {/* Logo */}
-      <Link href="./">
-        <div className="flex items-center gap-2">
+    <header className="w-full bg-white shadow-md">
+      <div className="flex items-center justify-between px-6 py-4 md:px-10">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.svg" alt="Logo" width={39} height={48} />
+          <h2 className="font-bold text-xl md:text-2xl">
+            TravelGenius - AI
+          </h2>
+        </Link>
 
-          <h2 className="font-bold text-2xl">TravelGenius - AI</h2>
-        </div>
-      </Link>
-
-      {/* Menu */}
-      <div className="flex items-center gap-5">
-        {menuItems.map((item, index) => (
-          <a key={index} href={item.path}>
-            <h2 className="text-lg hover:scale-105 transition-all hover:text-primary">
+        {/* Desktop Menu */}
+        <nav className="hidden md:flex items-center gap-6">
+          {menuItems.map((item) => (
+            <Link
+              key={item.title}
+              href={item.path}
+              className="text-lg hover:text-primary transition"
+            >
               {item.title}
-            </h2>
-          </a>
-        ))}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Desktop Action */}
+        <div className="hidden md:block">
+          {!user ? (
+            <SignInButton mode="modal">
+              <Button>Get Started</Button>
+            </SignInButton>
+          ) : (
+            <Link href="/create-new-trip">
+              <Button>Create Trip</Button>
+            </Link>
+          )}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="md:hidden"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
       </div>
 
-      {/* Get Started Button #087443 */}
-      {!user ? (
-        <SignInButton mode="modal">
-          <Button className="cursor-pointer">Get Started</Button>
-        </SignInButton>
-      ) : (
-        <Link href="/create-new-trip">
-          <Button>Create Trip</Button>
-        </Link>
+      {/* Mobile Menu */}
+      {menuOpen && (
+        <div className="md:hidden border-t bg-white px-6 py-4">
+          <nav className="flex flex-col gap-4">
+            {menuItems.map((item) => (
+              <Link
+                key={item.title}
+                href={item.path}
+                onClick={() => setMenuOpen(false)}
+                className="text-lg"
+              >
+                {item.title}
+              </Link>
+            ))}
+
+            <div className="pt-2">
+              {!user ? (
+                <SignInButton mode="modal">
+                  <Button className="w-full">Get Started</Button>
+                </SignInButton>
+              ) : (
+                <Link href="/create-new-trip">
+                  <Button className="w-full">Create Trip</Button>
+                </Link>
+              )}
+            </div>
+          </nav>
+        </div>
       )}
-    </div>
+    </header>
   );
 };
 
