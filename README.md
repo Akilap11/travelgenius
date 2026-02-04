@@ -7,30 +7,88 @@
 </p>
 
 ## Overview
-AI Trip Planner is a full stack web application that helps users plan personalized trips using AI. Built with **Next.js**, **React**, and **TypeScript**, it integrates **Mapbox** for interactive maps, **Google Places API** for location data, **Arcjet** for performance optimization, and **Clerk** for authentication.
+
+AI Trip Planner is a full-stack web app that helps users plan travel itineraries. The app uses AI to suggest trips and includes interactive maps, location search, and user authentication.
+
+This project is designed as a learning tool for working with AI, prompts, and modern web technologies.
 
 ## Features
-- AI-powered trip suggestions
-- Interactive maps with Mapbox
-- Real-time location search via Google Places API
-- User authentication with Clerk
-- Optimized performance using Arcjet
-- Fully deployable with Next.js
+
+* AI-powered trip itinerary generation with structured JSON
+* Interactive maps using Mapbox
+* Location search via Google Places API
+* User authentication and session management with Clerk
+* OpenAI API integration for AI-generated itineraries
+* Performance and security optimizations with Arcjet
 
 ## Tech Stack
-- **Frontend:** Next.js, React, TypeScript  
-- **Backend:** Convex  
-- **Authentication:** Clerk  
-- **Maps & Locations:** Mapbox, Google Places API  
-- **Deployment & Optimization:** Arcjet  
 
-## Installation
+**Frontend:**
+* Next.js 14 (App Router)
+* React
+* TypeScript
+* Mapbox
 
-### Prerequisites
-- Node.js >= 18.x
-- npm or yarn
+**Backend & Services:**
+* Convex (Database and backend logic)
+* Clerk (Authentication)
+* Google Places API (Location search)
+* Arcjet (Security and performance)
 
-### Steps
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/ai-trip-planner.git
+**AI Integration:**
+* OpenAI API for generating trip data
+* Custom prompts for structured outputs
+* Validation of AI-generated data
+* Safe rendering in the UI
+
+## Setup Instructions
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Akilap11/travelgenius-ai.git
+cd travelgenius-ai
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Environment variables
+
+Create a `.env` file:
+
+```env
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=**your_key**
+CLERK_SECRET_KEY=**your_key**
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
+NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
+
+# Arcjet Security
+ARCJET_KEY=**your_key**
+```
+
+### 4. Start the development server
+
+```bash
+npm run dev
+```
+
+The app will be available at:
+
+```
+http://localhost:3000
+```
+
+## Notes
+
+* This project is mainly for learning AI integration, prompts, and Next.js features.
+* It demonstrates how to handle AI output safely in a web app.
+* Focus is on clean architecture, type safety, and modular components.
