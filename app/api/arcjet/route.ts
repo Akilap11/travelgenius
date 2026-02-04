@@ -1,33 +1,38 @@
 import arcjet, { tokenBucket } from "@arcjet/next";
-import type { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Your Arcjet key
   rules: [
-    // Create a token bucket rate limit. Other algorithms are supported.
     tokenBucket({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      mode: "LIVE", // Use "DRY_RUN" to log only
       characteristics: ["userId"], // track requests by a custom user ID
       refillRate: 5, // refill 5 tokens per interval
-      interval: 100, // refill every 10 seconds
-      capacity: 10, // bucket maximum capacity of 10 tokens
+      interval: 100, // interval in milliseconds
+      capacity: 10, // max tokens
     }),
   ],
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
-  const userId = "user123"; // Replace with your authenticated user ID
-  const decision = await aj.protect(req, { userId, requested: 5 }); // Deduct 5 tokens from the bucket
-  console.log("Arcjet decision", decision);
+export async function POST(req: NextRequest) {
+  try {
+    const userId = "user123"; // Replace with your authenticated user ID
+    const decision = await aj.protect(req, { userId, requested: 5 });
 
-  if (decision.isDenied()) {
-    return res
-      .status(429)
-      .json({ error: "Too many requests", reason: decision.reason });
+    console.log("Arcjet decision", decision);
+
+    if (decision.isDenied()) {
+      return NextResponse.json(
+        { error: "Too many requests", reason: decision.reason },
+        { status: 429 }
+      );
+    }
+
+    return NextResponse.json({ name: "Hello world" }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
   }
-
-  res.status(200).json({ name: "Hello world" });
 }
