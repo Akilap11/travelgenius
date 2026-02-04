@@ -38,10 +38,11 @@ function ChatBox() {
 
   const [isFinal, setIsFinal] = useState<boolean>(false);
   const [tripDetail, setTripDetail] = useState<TripInfo | null>(null);
-  const [showFinalGenerating, setShowFinalGenerating] =
-    useState<boolean>(false);
+  const [showFinalGenerating, setShowFinalGenerating] = useState<boolean>(false);
   const SaveTripDetail = useMutation((api as any).tripDetail?.CreateTripDetail);
-  const [userDetail, setUserDetail] = useUserDetail();
+
+  const userDetailObj = useUserDetail();
+  const userId = userDetailObj?.id ?? null;
 
   const onSend = async () => {
     if (!userInput?.trim() && !isFinal) return;
@@ -53,7 +54,7 @@ function ChatBox() {
       content: userInput || "Ok, Great!",
     };
 
-    setMessages((prev: Message[]) => [...prev, newMsg]);
+    setMessages((prev) => [...prev, newMsg]);
     setUserInput("");
 
     try {
@@ -62,10 +63,8 @@ function ChatBox() {
         isFinal,
       });
 
-      console.log("AI Response:", result?.data);
-
       if (!isFinal) {
-        setMessages((prev: Message[]) => [
+        setMessages((prev) => [
           ...prev,
           {
             role: "assistant",
@@ -74,16 +73,15 @@ function ChatBox() {
           },
         ]);
       }
-      if (isFinal) {
-        setTripDetail(result?.data?.trip_plan);
+
+      if (isFinal && result?.data?.trip_plan) {
+        setTripDetail(result.data.trip_plan);
         const tripId = uuidv4();
         await SaveTripDetail({
-          tripDetail: result?.data?.trip_plan,
-          tripId: tripId,
-          uid: userDetail?.id,
+          tripDetail: result.data.trip_plan,
+          tripId,
+          uid: userId,
         });
-
-
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -91,9 +89,8 @@ function ChatBox() {
       setLoading(false);
     }
   };
-  const QuestionUiMap: {
-    [question: string]: "budget" | "groupSize" | "days" | null;
-  } = {
+
+  const QuestionUiMap: { [question: string]: "budget" | "groupSize" | "days" | null } = {
     "Where will you be starting your trip from?": null,
     "Where are you going?": null,
     "Select your group size": "groupSize",
@@ -106,39 +103,13 @@ function ChatBox() {
 
     switch (uiType) {
       case "budget":
-        return (
-          <BudgetUi
-            onSelectedOption={(v: string) => {
-              setUserInput(v);
-              onSend();
-            }}
-          />
-        );
+        return <BudgetUi onSelectedOption={(v: React.SetStateAction<string>) => { setUserInput(v); onSend(); }} />;
       case "groupSize":
-        return (
-          <GroupSizeUi
-            onSelectedOption={(v: string) => {
-              setUserInput(v);
-              onSend();
-            }}
-          />
-        );
+        return <GroupSizeUi onSelectedOption={(v: React.SetStateAction<string>) => { setUserInput(v); onSend(); }} />;
       case "days":
-        return (
-          <SelectDaysUi
-            onSelectedOption={(v: string) => {
-              setUserInput(v);
-              onSend();
-            }}
-          />
-        );
+        return <SelectDaysUi onSelectedOption={(v: React.SetStateAction<string>) => { setUserInput(v); onSend(); }} />;
       case "final":
-        return (
-          <FinalUi
-            isGenerating={showFinalGenerating}
-            onViewTrip={() => console.log(tripDetail)}
-          />
-        );
+        return <FinalUi isGenerating={showFinalGenerating} onViewTrip={() => console.log(tripDetail)} />;
       default:
         return null;
     }
@@ -153,30 +124,20 @@ function ChatBox() {
   }, [messages]);
 
   useEffect(() => {
-    if (isFinal && userInput) {
-      onSend();
-    }
+    if (isFinal && userInput) onSend();
   }, [isFinal, userInput]);
 
   return (
     <div className="flex flex-col h-[80vh]">
-      {messages?.length === 0 && (
-        <EmptyboxState
-          onSelectOption={(v: string) => {
-            setUserInput(v);
-            onSend();
-          }}
-        />
+      {messages.length === 0 && (
+        <EmptyboxState onSelectOption={(v: React.SetStateAction<string>) => { setUserInput(v); onSend(); }} />
       )}
 
-      {/* Display Messages */}
       <section className="flex-1 overflow-y-auto p-4">
-        {messages.map((msg: Message, index) =>
+        {messages.map((msg, index) =>
           msg.role === "user" ? (
             <div className="flex justify-end mt-2" key={index}>
-              <div className="max-w-lg bg-primary text-white px-4 py-2 rounded-lg">
-                {msg.content}
-              </div>
+              <div className="max-w-lg bg-primary text-white px-4 py-2 rounded-lg">{msg.content}</div>
             </div>
           ) : (
             <div className="flex justify-start mt-2" key={index}>
@@ -196,23 +157,19 @@ function ChatBox() {
         )}
       </section>
 
-      {/* Input Area */}
       {!isFinal && (
         <div className="border border-gray-300 rounded-2xl p-4 hover:shadow-md transition-shadow relative">
           <Textarea
             placeholder="Start typing here..."
             className="w-full h-28 bg-transparent border-none focus-visible:ring-0 shadow-none resize-none"
-            onChange={(event) => setUserInput(event.target.value ?? "")}
+            onChange={(e) => setUserInput(e.target.value ?? "")}
             value={userInput}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                onSend();
-              }
+              if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend(); }
             }}
           />
           <Button
-            size={"icon"}
+            size="icon"
             className="absolute right-6 bottom-6"
             onClick={onSend}
             disabled={loading || !userInput.trim()}
