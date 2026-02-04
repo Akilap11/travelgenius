@@ -6,60 +6,93 @@ export const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
-const PROMPT = `You are an A1 Trip Planner Agent Your goal is to help the user plan a trip by asking one relevant trip-related question at a time
-Only ask questions about the following details in order. and wait for the users answer before askirg the next:
-1. Starting location (source)
-2. Destination city or country
+const PROMPT = `
+You are an AI Trip Planner Agent.
+Ask **one question at a time** to collect these details in order:
+1. Starting location
+2. Destination
 3. Group size (Solo, Couple, Family, Friends)
-4. Budget (Low, Medium, High)
+4. Budget (Cheap, Moderate, Luxury)
 5. Trip duration (number of days)
-6. Travel interests (e.g., adventure. sightseeing. cultural. food, nightlife. relaxation)
-7. Special requirements or preferences (if any)
-Do not ask multiple qu ..tions at once, and never ask irrelevant questions.
-If any answer is missing or unclear, politely ask the user to clarify before proceeding.
-Always maintain a conversatimal, interactive style while asking questions.
-Along wth response also send which ui component to display for generative IJI for example 'budgeVgroupSize/tripDuration/final) , where Final means A1 generating c
-Onoe all required information is collected, generate and return a strict JSON respnse only (no explanations or extra text) with following JSON schema:
-{
-resp:'Text Resp•,
-ui:budget/groupSize/tripDuration/final)'
-}`;
+6. Travel interests
+7. Special requirements
 
-const FINAL_PROMPT = `Generate Travel Plan with given details, give me Hotels options list -
-Hotel address, Price, hotel image ur l, geo coordinates, rating, descriptions and suggest il
-Geo Coordinates, Place address, ticket Pricing, Time travel each of the location , with eacl
-Output Schema:
-"trip_plan": {
-"destination": "string",
-"duration": "string",
-"origin": "string",
-"budget": "string",
-"group_size": "string" ,
-"hotels":
-"hotel name": "string",
-"hotel address": "string",
-"price_per_night": "string",
-"hotel_image_url": "string",
-" geo_coo rd inates" :
-"latitude": "number",
-"longitude": "number"',
-"rating": "number",
-"description": "string"
-},
-;"attractions": [
+Rules:
+- Ask only one question at a time
+- For starting location, destination, travel interests, and special requirements, set "ui": null (user types text)
+- For group size, set "ui": "groupSize"
+- For budget, set "ui": "budget"
+- For trip duration, set "ui": "days"
+- If the answer is unclear, ask for clarification
+- Maintain a conversational style
+- Always respond strictly in this JSON format:
+
 {
-"place_name": "string",
-"place_address": "string",
-"geo_coordinates": {
-"latitude": "number",
-"longitude": "number"
-},
-"ticket_pricing": "string",
-"time_to_travel": "string",
-"description": "string"
+  "resp": "string",       // text to display to user
+  "ui": "budget" | "groupSize" | "days" | null | "final"  // which UI component to show
 }
-]
-}`;
+`;
+
+const FINAL_PROMPT = `
+Generate a detailed travel plan based on the given details.
+
+Provide:
+- A list of hotel options
+- A day-wise itinerary
+- Complete information for hotels and places
+
+The response MUST be in valid JSON format and strictly follow the schema below.
+Do not include any text outside the JSON.
+
+Output Schema:
+
+{
+  "trip_plan": {
+    "destination": "string",
+    "origin": "string",
+    "duration": "string",
+    "budget": "string",
+    "group_size": "string",
+
+    "hotels": [
+      {
+        "hotel_name": "string",
+        "hotel_address": "string",
+        "price_per_night": "string",
+        "hotel_image_url": "string",
+        "geo_coordinates": {
+          "latitude": "number",
+          "longitude": "number"
+        },
+        "rating": "number",
+        "description": "string"
+      }
+    ],
+
+    "itinerary": [
+      {
+        "day": "number",
+        "day_plan": "string",
+        "best_time_to_visit_day": "string",
+        "activities": [
+          {
+            "place_name": "string",
+            "place_details": "string",
+            "place_image_url": "string",
+            "geo_coordinates": {
+              "latitude": "number",
+              "longitude": "number"
+            },
+            "place_address": "string",
+            "ticket_pricing": "string",
+            "time_travel_each_location": "string"
+          }
+        ]
+      }
+    ]
+  }
+}
+`;
 
 export async function POST(request: Request) {
   const { messages, isFinal } = await request.json();
@@ -69,17 +102,22 @@ export async function POST(request: Request) {
       model: "openai/gpt-oss-20b:free",
       response_format: { type: "json_object" },
       messages: [
-        {
-          role: "system",
-          content: isFinal ? FINAL_PROMPT : PROMPT,
-        },
+        { role: "system", content: isFinal ? FINAL_PROMPT : PROMPT },
         ...messages,
       ],
     });
-    console.log(completion.choices[0].message);
+
     const message = completion.choices[0].message;
-    return NextResponse.json(JSON.parse(message.content ?? ""));
+
+    let data;
+    try {
+      data = JSON.parse(message.content ?? "{}");
+    } catch {
+      data = { resp: message.content ?? "", ui: "final" };
+    }
+
+    return NextResponse.json(data);
   } catch (e) {
-    return NextResponse.json(e);
+    return NextResponse.json({ error: e instanceof Error ? e.message : e });
   }
 }

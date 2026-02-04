@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 
@@ -6,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function ContactUsPage() {
   return (
-    <div className="mt-24 flex justify-center px-6">
+    <div className="mt-16 flex justify-center px-6">
       <div className="max-w-2xl w-full">
         <h1 className="text-4xl font-bold mb-4 text-center">
           Contact Us

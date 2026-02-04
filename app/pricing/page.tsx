@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
@@ -41,7 +42,7 @@ const plans = [
 
 export default function PricingPage() {
   return (
-    <div className="mt-24 flex justify-center px-6">
+    <div className="mt-16 flex justify-center px-6">
       <div className="max-w-6xl w-full text-center">
         <h1 className="text-4xl font-bold mb-4">Pricing</h1>
         <p className="text-gray-600 mb-12">

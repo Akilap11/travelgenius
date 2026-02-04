@@ -1,5 +1,6 @@
 import React from 'react'
 import ChatBox from './_components/ChatBox'
+import Itinerary from './_components/itinerary'
 
 function page() {
   return (
@@ -8,7 +9,7 @@ function page() {
         <ChatBox />
       </div>
       <div>
-       
+       <Itinerary />
       </div>
     </div>
   )

@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import axios from "axios";
@@ -7,13 +8,27 @@ import React, { useEffect, useState } from "react";
 import EmptyboxState from "./EmptyboxState";
 import GroupSizeUi from "./GroupSizeUi";
 import BudgetUi from "./BudgetUi";
-import SelectDaysUi from "./SelectDaysUi";      
-import FinalUi from "./FinalUi";                 
+import SelectDaysUi from "./SelectDaysUi";
+import FinalUi from "./FinalUi";
+import { api } from "@/convex/_generated/api";
+import { useMutation } from "convex/react";
+import { useUserDetail } from "@/app/provider";
+import { v4 as uuidv4 } from 'uuid';
 
 type Message = {
   role: string;
   content: string;
   ui?: string;
+};
+
+type TripInfo = {
+  destination: string;
+  duration: string;
+  origin: string;
+  budget: string;
+  group_size: string;
+  hotels: any[];
+  itinerary: any[];
 };
 
 function ChatBox() {
@@ -22,8 +37,11 @@ function ChatBox() {
   const [loading, setLoading] = useState<boolean>(false);
 
   const [isFinal, setIsFinal] = useState<boolean>(false);
-  const [tripDetail, setTripDetail] = useState<any>(null);
-  const [showFinalGenerating, setShowFinalGenerating] = useState<boolean>(false);
+  const [tripDetail, setTripDetail] = useState<TripInfo | null>(null);
+  const [showFinalGenerating, setShowFinalGenerating] =
+    useState<boolean>(false);
+  const SaveTripDetail = useMutation((api as any).tripDetail?.CreateTripDetail);
+  const [userDetail, setUserDetail] = useUserDetail();
 
   const onSend = async () => {
     if (!userInput?.trim() && !isFinal) return;
@@ -55,12 +73,17 @@ function ChatBox() {
             ui: result?.data?.ui,
           },
         ]);
-      } else {
-        setTripDetail(result?.data.trip_plan);
-        setShowFinalGenerating(true);
-        setTimeout(() => {
-          setShowFinalGenerating(false);
-        }, 3000);
+      }
+      if (isFinal) {
+        setTripDetail(result?.data?.trip_plan);
+        const tripId = uuidv4();
+        await SaveTripDetail({
+          tripDetail: result?.data?.trip_plan,
+          tripId: tripId,
+          uid: userDetail?.id,
+        });
+
+
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -68,46 +91,57 @@ function ChatBox() {
       setLoading(false);
     }
   };
+  const QuestionUiMap: {
+    [question: string]: "budget" | "groupSize" | "days" | null;
+  } = {
+    "Where will you be starting your trip from?": null,
+    "Where are you going?": null,
+    "Select your group size": "groupSize",
+    "Select your budget": "budget",
+    "Trip duration in days?": "days",
+  };
 
-  const RenderGenerativeUi = (ui: string) => {
-    if (ui === "budget") {
-      return (
-        <BudgetUi
-          onSelectedOption={(v: string) => {
-            setUserInput(v);
-            onSend();
-          }}
-        />
-      );
-    } else if (ui === "groupSize") {
-      return (
-        <GroupSizeUi
-          onSelectedOption={(v: string) => {
-            setUserInput(v);
-            onSend();
-          }}
-        />
-      );
-    } else if (ui === "days") {
-      return (
-        <SelectDaysUi
-          onSelectedOption={(v: string) => {
-            setUserInput(v);
-            onSend();
-          }}
-        />
-      );
-    } else if (ui === "final") {
-      return (
-        <FinalUi
-          isGenerating={showFinalGenerating}
-          onViewTrip={() => {
-            console.log("View trip clicked", tripDetail);
-          }}
-        />
-      );
+  const RenderGenerativeUi = (msg: Message) => {
+    const uiType = QuestionUiMap[msg.content] ?? msg.ui;
+
+    switch (uiType) {
+      case "budget":
+        return (
+          <BudgetUi
+            onSelectedOption={(v: string) => {
+              setUserInput(v);
+              onSend();
+            }}
+          />
+        );
+      case "groupSize":
+        return (
+          <GroupSizeUi
+            onSelectedOption={(v: string) => {
+              setUserInput(v);
+              onSend();
+            }}
+          />
+        );
+      case "days":
+        return (
+          <SelectDaysUi
+            onSelectedOption={(v: string) => {
+              setUserInput(v);
+              onSend();
+            }}
+          />
+        );
+      case "final":
+        return (
+          <FinalUi
+            isGenerating={showFinalGenerating}
+            onViewTrip={() => console.log(tripDetail)}
+          />
+        );
+      default:
+        return null;
     }
-    return null;
   };
 
   useEffect(() => {
@@ -148,7 +182,7 @@ function ChatBox() {
             <div className="flex justify-start mt-2" key={index}>
               <div className="max-w-lg bg-gray-200 text-black px-4 py-2 rounded-lg">
                 {msg.content}
-                {RenderGenerativeUi(msg.ui ?? "")}
+                {RenderGenerativeUi(msg)}
               </div>
             </div>
           )
