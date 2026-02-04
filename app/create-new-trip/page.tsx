@@ -1,20 +1,24 @@
-'use client'; 
+"use client";
 
-import React from 'react'
-import ChatBox from './_components/ChatBox'
-import Itinerary from './_components/Itinerary'
+import dynamic from "next/dynamic";
+import Itinerary from './_components/Itinerary';
+
+// Make ChatBox client-only to avoid prerender errors
+const ChatBox = dynamic(() => import('./_components/ChatBox'), {
+  ssr: false,
+});
 
 function Page() {
   return (
-    <div className='grid grid-cols-1 md:grid-cols-2 gap-5 p-10'>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-10">
       <div>
         <ChatBox />
       </div>
       <div>
-       <Itinerary />
+        <Itinerary />
       </div>
     </div>
-  )
+  );
 }
 
-export default Page
+export default Page;
