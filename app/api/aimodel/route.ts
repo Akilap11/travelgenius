@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
-export const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
-
 const PROMPT = `
 You are an AI Trip Planner Agent.
 Ask **one question at a time** to collect these details in order:
@@ -53,7 +48,6 @@ Output Schema:
     "duration": "string",
     "budget": "string",
     "group_size": "string",
-
     "hotels": [
       {
         "hotel_name": "string",
@@ -68,7 +62,6 @@ Output Schema:
         "description": "string"
       }
     ],
-
     "itinerary": [
       {
         "day": "number",
@@ -94,8 +87,23 @@ Output Schema:
 }
 `;
 
+type UserMessage = {
+  role: "user" | "system";
+  content: string;
+};
+
+type RequestBody = {
+  messages: UserMessage[];
+  isFinal: boolean;
+};
+
 export async function POST(request: Request) {
-  const { messages, isFinal } = await request.json();
+  const { messages, isFinal }: RequestBody = await request.json();
+
+  const openai = new OpenAI({
+    baseURL: "https://openrouter.ai/api/v1",
+    apiKey: process.env.OPENROUTER_API_KEY,
+  });
 
   try {
     const completion = await openai.chat.completions.create({
@@ -118,6 +126,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json(data);
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : e });
+    return NextResponse.json({
+      error: e instanceof Error ? e.message : "Unknown error",
+    });
   }
 }
