@@ -8,9 +8,7 @@
 
 ## Overview
 
-AI Trip Planner is a full-stack web app that helps users plan travel itineraries. The app uses AI to suggest trips and includes interactive maps, location search, and user authentication.
-
-This project is designed as a learning tool for working with AI, prompts, and modern web technologies.
+AI Trip Planner is a full-stack web application that enables users to generate personalized travel itineraries using AI. The platform integrates interactive maps, location search, and authentication, demonstrating real-world AI integration in a production-style web application.
 
 ## Features
 

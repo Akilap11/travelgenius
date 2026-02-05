@@ -13,7 +13,7 @@ import FinalUi from "./FinalUi";
 import { api } from "@/convex/_generated/api";
 import { useMutation } from "convex/react";
 import { useUserDetail } from "@/app/provider";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 type Message = {
   role: string;
@@ -21,14 +21,48 @@ type Message = {
   ui?: string;
 };
 
-type TripInfo = {
+export type TripInfo = {
   destination: string;
   duration: string;
   origin: string;
   budget: string;
   group_size: string;
-  hotels: any[];
-  itinerary: any[];
+  hotels: Hotel[];
+  itinerary: Itinerary[];
+};
+
+export type Hotel = {
+  hotel_name: string;
+  hotel_address: string;
+  price_per_night: string;
+  hotel_image_url: string;
+  geo_coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  rating: number;
+  description: string;
+};
+
+export type Activity = {
+  place_name: string;
+  place_details: string;
+  place_image_url: string;
+  geo_coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  place_address: string;
+  ticket_pricing: string;
+  time_travel_each_location: string;
+  best_time_to_visit: string;
+};
+
+export type Itinerary = {
+  day: number;
+  day_plan: string;
+  best_time_to_visit_day: string;
+  activities: Activity[];
 };
 
 function ChatBox() {
@@ -38,7 +72,8 @@ function ChatBox() {
 
   const [isFinal, setIsFinal] = useState<boolean>(false);
   const [tripDetail, setTripDetail] = useState<TripInfo | null>(null);
-  const [showFinalGenerating, setShowFinalGenerating] = useState<boolean>(false);
+  const [showFinalGenerating, setShowFinalGenerating] =
+    useState<boolean>(false);
   const SaveTripDetail = useMutation((api as any).tripDetail?.CreateTripDetail);
 
   const userDetailObj = useUserDetail();
@@ -90,7 +125,9 @@ function ChatBox() {
     }
   };
 
-  const QuestionUiMap: { [question: string]: "budget" | "groupSize" | "days" | null } = {
+  const QuestionUiMap: {
+    [question: string]: "budget" | "groupSize" | "days" | null;
+  } = {
     "Where will you be starting your trip from?": null,
     "Where are you going?": null,
     "Select your group size": "groupSize",
@@ -103,13 +140,39 @@ function ChatBox() {
 
     switch (uiType) {
       case "budget":
-        return <BudgetUi onSelectedOption={(v: React.SetStateAction<string>) => { setUserInput(v); onSend(); }} />;
+        return (
+          <BudgetUi
+            onSelectedOption={(v: React.SetStateAction<string>) => {
+              setUserInput(v);
+              onSend();
+            }}
+          />
+        );
       case "groupSize":
-        return <GroupSizeUi onSelectedOption={(v: React.SetStateAction<string>) => { setUserInput(v); onSend(); }} />;
+        return (
+          <GroupSizeUi
+            onSelectedOption={(v: React.SetStateAction<string>) => {
+              setUserInput(v);
+              onSend();
+            }}
+          />
+        );
       case "days":
-        return <SelectDaysUi onSelectedOption={(v: React.SetStateAction<string>) => { setUserInput(v); onSend(); }} />;
+        return (
+          <SelectDaysUi
+            onSelectedOption={(v: React.SetStateAction<string>) => {
+              setUserInput(v);
+              onSend();
+            }}
+          />
+        );
       case "final":
-        return <FinalUi isGenerating={showFinalGenerating} onViewTrip={() => console.log(tripDetail)} />;
+        return (
+          <FinalUi
+            isGenerating={showFinalGenerating}
+            onViewTrip={() => console.log(tripDetail)}
+          />
+        );
       default:
         return null;
     }
@@ -130,14 +193,21 @@ function ChatBox() {
   return (
     <div className="flex flex-col h-[80vh]">
       {messages.length === 0 && (
-        <EmptyboxState onSelectOption={(v: React.SetStateAction<string>) => { setUserInput(v); onSend(); }} />
+        <EmptyboxState
+          onSelectOption={(v: React.SetStateAction<string>) => {
+            setUserInput(v);
+            onSend();
+          }}
+        />
       )}
 
       <section className="flex-1 overflow-y-auto p-4">
         {messages.map((msg, index) =>
           msg.role === "user" ? (
             <div className="flex justify-end mt-2" key={index}>
-              <div className="max-w-lg bg-primary text-white px-4 py-2 rounded-lg">{msg.content}</div>
+              <div className="max-w-lg bg-primary text-white px-4 py-2 rounded-lg">
+                {msg.content}
+              </div>
             </div>
           ) : (
             <div className="flex justify-start mt-2" key={index}>
@@ -165,7 +235,10 @@ function ChatBox() {
             onChange={(e) => setUserInput(e.target.value ?? "")}
             value={userInput}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend(); }
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                onSend();
+              }
             }}
           />
           <Button

@@ -53,37 +53,37 @@ const data = [
   {
     category: "Paris, France",
     title: "Wander through Paris with AI-crafted routes and hidden gems.",
-    src: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=100&w=3000&auto=format&fit=crop",
+    src: "/images/paris.jpg",
     content: <DummyContent />,
   },
   {
     category: "Kyoto, Japan",
     title: "Let AI guide you through Kyoto’s timeless beauty and culture.",
-    src: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?q=100&w=3000&auto=format&fit=crop",
+    src: "/images/kyoto.jpg",
     content: <DummyContent />,
   },
   {
     category: "New York City, USA",
     title: "Find your perfect day in the city that never sleeps.",
-    src: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=100&w=3000&auto=format&fit=crop",
+    src: "/images/newyork.jpg",
     content: <DummyContent />,
   },
   {
     category: "Bali, Indonesia",
     title: "Plan serene beaches, waterfalls, and tropical adventures.",
-    src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=100&w=3000&auto=format&fit=crop",
+    src: "/images/bali.jpg",
     content: <DummyContent />,
   },
   {
     category: "Rome, Italy",
     title: "Explore ancient history and modern charm effortlessly.",
-    src: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=100&w=3000&auto=format&fit=crop",
+    src: "/images/rome.jpg",
     content: <DummyContent />,
   },
   {
     category: "Cape Town, South Africa",
     title: "Mountains, oceans, and vibrant streets — all in one AI plan.",
-    src: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?q=100&w=3000&auto=format&fit=crop",
+    src: "/images/capetown.jpg",
     content: <DummyContent />,
   },
 ];
