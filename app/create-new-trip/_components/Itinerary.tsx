@@ -2,6 +2,11 @@
 import React from "react";
 import { Timeline } from "@/components/ui/timeline";
 import Image from "next/image";
+import { Clock, ExternalLinkIcon, Star, Ticket, Timer } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import HotelCardItem from "./HotelCardItem";
+import PlaceCardItem from "./PlaceCardItem";
 
 const TRIP_DATA = {
   destination: "Paris, France",
@@ -110,21 +115,26 @@ function Itinerary() {
     {
       title: "Recommended Hotels",
       content: (
-        <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {TRIP_DATA?.hotels.map((hotel, index) => (
-            <div key={index}>
-              <Image
-                src={"/images/paris.jpg"}
-                alt="place-image"
-                width={400}
-                height={200}
-                className="rounded-lg mb-4"
-              />
-            </div>
+           <HotelCardItem key={index} hotel={hotel} />
           ))}
         </div>
       ),
     },
+    ...TRIP_DATA.itinerary.map((dayData) => ({
+      title: `Day ${dayData?.day}`,
+      content: (
+        <div className="">
+          <p>Best Time: {dayData?.best_time_to_visit_day}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            {dayData?.activities.map((activity, idx) => (
+              <PlaceCardItem key={idx} activity={activity} idx={idx} />
+            ))}
+          </div>
+        </div>
+      ),
+    })),
   ];
   return (
     <div className="relative w-full h-[80vh] overflow-auto">

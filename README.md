@@ -87,6 +87,7 @@ http://localhost:3000
 
 ## Notes
 
-* This project is mainly for learning AI integration, prompts, and Next.js features.
-* It demonstrates how to handle AI output safely in a web app.
-* Focus is on clean architecture, type safety, and modular components.
+* This project demonstrates real-world AI integration in a full-stack Next.js application.
+* Emphasis is placed on clean architecture, type safety, and modular component design.
+* Some location-based features rely on the Google Places API, which requires a paid billing account. 
+  As a result, certain advanced place search features may be limited without an active billing setup.
